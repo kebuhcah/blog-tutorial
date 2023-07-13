@@ -1,12 +1,14 @@
 import type { ActionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useNavigation } from "@remix-run/react";
 
 import { createPost } from "~/models/post.server";
 
 import invariant from "tiny-invariant";
 
 export const action = async ({ request }: ActionArgs) => {
+    // TODO: remove me
+    await new Promise((res) => setTimeout(res, 1000));
     const formData = await request.formData();
 
     const title = formData.get("title");
@@ -48,6 +50,11 @@ const inputClassName =
 
 export default function NewPost() {
     const errors = useActionData<typeof action>();
+
+    const navigation = useNavigation();
+    const isCreating = Boolean(
+        navigation.state === "submitting"
+    );
 
     return (
         <Form method="post">
@@ -98,8 +105,9 @@ export default function NewPost() {
                 <button
                     type="submit"
                     className="rounded bg-blue-500 py-2 px-4 text-white hover:bg-blue-600 focus:bg-blue-400 disabled:bg-blue-300"
+                    disabled={isCreating}
                 >
-                    Create Post
+                    {isCreating ? "Creating..." : "Create Post"}
                 </button>
             </p>
         </Form>
